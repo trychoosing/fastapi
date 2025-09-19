@@ -1,7 +1,5 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser 
+from fastapi.middleware.cors import CORSMiddleware 
 import os
 
 # Create an instance of FastAPI to serve as the main application.
