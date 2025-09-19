@@ -94,6 +94,8 @@ async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
                                           prompt_1[0],
                                           image1,
                                           DEVICE1,)
+  if os.path.exists( '/fastapi/uf/text_gen.txt')==True :
+      return 'Wait'
   with open('/fastapi/uf/text_gen.txt','w') as f:
       f.write(text_gen1)
   return {'text_gen1':text_gen1}
@@ -112,7 +114,7 @@ async def liveness():
     if os.path.exists('/fastapi/uf/text_gen.txt')==True:
         with open('/fastapi/uf/text_gen.txt','r') as f:
           text_gen1 = f.read()
-      
+        os.system("rm /fastapi/uf/*")
         return  {'text_gen1':text_gen1}
     else:
         return 'liveness'
