@@ -78,22 +78,40 @@ from typing import Annotated
 from typing import List
 # Define API endpoints
 import shutil
+import json
 
 @app.post("/submit")
 async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
   try:
-    with open(f"/content/uploaded_files/{image.filename}", "wb") as buffer:
+    with open(f"/fastapi/uf/{image.filename}", "wb") as buffer:
       shutil.copyfileobj(image.file, buffer)
   finally:
     image.file.close()
-  image1 = load_image_for_qwen(f"/content/uploaded_files/{image.filename}")
+  image1 = load_image_for_qwen(f"/fastapi/uf/{image.filename}")
 
   text_gen1 = generate_text_from_image_VLM(model1,
                                            processor1,
                                           prompt_1[0],
                                           image1,
                                           DEVICE1,)
+  with open('/fastapi/uf/text_gen.txt','w') as f:
+      f.write(text_gen1)
   return {'text_gen1':text_gen1}
+  
+@app.get("/liveness")
+async def liveness():
+    """
+    Define a liveness check endpoint.
+
+    This route is used to verify that the API is operational and responding to requests.
+
+    Returns:
+        A simple string message indicating the API is working.
+    """
+    with open('/fastapi/uf/text_gen.txt','r') as f:
+      text_gen1 = f.read()
+  
+    return  {'text_gen1':text_gen1}
 
 @app.get("/liveness")
 async def liveness():
