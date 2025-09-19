@@ -108,22 +108,16 @@ async def liveness():
     Returns:
         A simple string message indicating the API is working.
     """
-    with open('/fastapi/uf/text_gen.txt','r') as f:
-      text_gen1 = f.read()
-  
-    return  {'text_gen1':text_gen1}
-
-@app.get("/liveness")
-async def liveness():
-    """
-    Define a liveness check endpoint.
-
-    This route is used to verify that the API is operational and responding to requests.
-
-    Returns:
-        A simple string message indicating the API is working.
-    """
-    return  "message ok"
+    import os
+    if os.path.exists('/fastapi/uf/text_gen.txt')==True:
+        with open('/fastapi/uf/text_gen.txt','r') as f:
+          text_gen1 = f.read()
+      
+        return  {'text_gen1':text_gen1}
+    else:
+        return 'liveness'
+        
+ 
 @app.get("/")
 async def root():
     return {"message": "Welcome to GPU Worker FastAPI!"}
