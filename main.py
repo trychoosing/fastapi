@@ -115,13 +115,18 @@ def def_prompt_with_task(task:task_definition,
 
 @app.post("/submit")
 async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
+  print('received')
   try:
+    print('trying')
     with open(f"/fastapi/uf/{image.filename}", "wb") as buffer:
       shutil.copyfileobj(image.file, buffer)
   finally:
+      
+    print('copy failed')
     image.file.close()
   image1 = load_image_for_qwen(f"/fastapi/uf/{image.filename}")
-  task_1 = task_definition(prompt_1[0],prompt_1[1],prompt_1[2],prompt_1[3] )
+  prompt_11= [item.strip() for item in prompt_1[0].split(',')]
+  task_1 = task_definition(prompt_11[0],prompt_11[1],prompt_11[2],prompt_11[3] )
   prompt_2 = def_prompt_with_task(task_1,processor1)
   text_gen1 = generate_text_from_image_VLM(model1,
                                            processor1,
