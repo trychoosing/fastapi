@@ -1,25 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware 
 import os
-
-# Create an instance of FastAPI to serve as the main application.
-app = FastAPI(
-    title="LangChain Server",
-    version="1.0",
-    description="Spin up a simple API server using Langchain's Runnable interfaces",
-)
-
-# Configure CORS middleware to allow all origins, enabling cross-origin requests.
-# details: https://fastapi.tiangolo.com/tutorial/cors/
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
-)
-
+from transformers import AutoProcessor
+import uvicorn 
+from pydantic import BaseModel
+import PIL.Image 
+import requests
+from fastapi import  File, UploadFile
+from typing import Annotated 
+from typing import List
+# Define API endpoints
+import shutil
+import json
+ 
 
 def load_qwen_VLM_model():
 
@@ -40,7 +33,6 @@ def load_image_for_qwen(nowfile:os.PathLike):
   from transformers.image_utils import load_image
   image1 = load_image(nowfile )
   return image1
-from transformers import AutoProcessor
 #define tasks
 
 def generate_text_from_image_VLM(model,
@@ -60,25 +52,66 @@ def generate_text_from_image_VLM(model,
   text_gen =  generated_texts[0]
   return text_gen
 
-import uvicorn
 # Register routes using LangChain's utility function which integrates the chat model into the API.
 
 # Load the model
-from fastapi import FastAPI
 app = FastAPI()
+# Configure CORS middleware to allow all origins, enabling cross-origin requests.
+# details: https://fastapi.tiangolo.com/tutorial/cors/
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+)
+
 model1, processor1, DEVICE1 = load_qwen_VLM_model()
-from pydantic import BaseModel
-import PIL.Image
 
 
-import requests
-from fastapi import  File, UploadFile
-from typing import Annotated
+class task_definition():
+      def __init__(self,
+                   type_of_calendar_event,
+                   do_or_note,
+                   recurrence_type,
+                   to_do_list):
+        self.type_of_calendar_event = type_of_calendar_event
+        self.do_or_note = do_or_note
+        self.recurrence_type = recurrence_type
+        self.to_do_list = to_do_list
+def def_prompt_with_task(task:task_definition,
+                     processor:AutoProcessor):
+  type_of_calendar_event = task.type_of_calendar_event
+  do_or_note = task.do_or_note
+  recurrence_type = task.recurrence_type
+  to_do_list = task.to_do_list
+  messages = [
+      {
+          "role": "user",
+          "content": [
+              {"type": "image"},
+              {"type": "text", "text": f"""Describe the {type_of_calendar_event} in the image.
 
-from typing import List
-# Define API endpoints
-import shutil
-import json
+                                      Write down each event/period/routine/activity in the {type_of_calendar_event} with legend.
+
+                                      Ensure that the events/periods/routines/activities have the fields describing the days, months, days of months, and frequencies but not specific years unless the specific years are mentioned.
+
+
+                                      """}
+          ]
+      },
+  ]
+
+  # Prepare inputs
+  prompt = processor.apply_chat_template(messages, add_generation_prompt=True)
+
+  return prompt
+ 
+
+
+
+
 
 @app.post("/submit")
 async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
@@ -88,10 +121,11 @@ async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
   finally:
     image.file.close()
   image1 = load_image_for_qwen(f"/fastapi/uf/{image.filename}")
-
+  task_1 = task_definition(prompt_1[0],prompt_1[1],prompt_1[2],prompt_1[3] )
+  prompt_2 = def_prompt_with_task(task_1,processor1)
   text_gen1 = generate_text_from_image_VLM(model1,
                                            processor1,
-                                          prompt_1[0],
+                                          prompt_2,
                                           image1,
                                           DEVICE1,)
   if os.path.exists( '/fastapi/uf/text_gen.txt')==True :
