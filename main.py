@@ -75,27 +75,31 @@ class task_definition():
                    type_of_calendar_event,
                    do_or_note,
                    recurrence_type,
-                   to_do_list):
+                   to_do_list,
+                   additional_note):
         self.type_of_calendar_event = type_of_calendar_event
         self.do_or_note = do_or_note
         self.recurrence_type = recurrence_type
         self.to_do_list = to_do_list
+        self.additional_note = additional_note
+        
 def def_prompt_with_task(task:task_definition,
                      processor:AutoProcessor):
   type_of_calendar_event = task.type_of_calendar_event
   do_or_note = task.do_or_note
   recurrence_type = task.recurrence_type
   to_do_list = task.to_do_list
+  additional_note = task.additional_note
   messages = [
       {
           "role": "user",
           "content": [
               {"type": "image"},
-              {"type": "text", "text": f"""Describe the {type_of_calendar_event} in the image.
+              {"type": "text", "text": f"""Describe the {type_of_calendar_event} in the image. 
 
                                       Write down each event/period/routine/activity in the {type_of_calendar_event} with legend.
 
-                                      Ensure that the events/periods/routines/activities have the fields describing the days, months, days of months, and frequencies but not specific years unless the specific years are mentioned.
+                                      Describe the schedule of the event/period/routine/activity, its location, and any notes {additional_note} for that event/period/routine/activity.                                      . 
 
 
                                       """}
@@ -122,11 +126,11 @@ async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
       shutil.copyfileobj(image.file, buffer)
   finally:
       
-    print('copy failed')
+    print('copy and close')
     image.file.close()
   image1 = load_image_for_qwen(f"/fastapi/uf/{image.filename}")
   prompt_11= [item.strip() for item in prompt_1[0].split(',')]
-  task_1 = task_definition(prompt_11[0],prompt_11[1],prompt_11[2],prompt_11[3] )
+  task_1 = task_definition(prompt_11[0],prompt_11[1],prompt_11[2],prompt_11[3],prompt_11[4] )
   prompt_2 = def_prompt_with_task(task_1,processor1)
   text_gen1 = generate_text_from_image_VLM(model1,
                                            processor1,
