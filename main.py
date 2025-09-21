@@ -99,8 +99,9 @@ def def_prompt_with_task(task:task_definition,
 
                                       Write down each event/period/routine/activity in the {type_of_calendar_event} with legend.
 
-                                      Describe the schedule of the event/period/routine/activity, its location, and any notes {additional_note} for that event/period/routine/activity.                                      . 
-
+                                      Describe the schedule of the event/period/routine/activity, its location, and any notes {additional_note} for that event/period/routine/activity.     
+                                      
+                                      In particular, the schedule should include dates in DD-MMM-YYYY HH:MM format where HH is 24-hour format.
 
                                       """}
           ]
