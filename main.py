@@ -90,13 +90,17 @@ def def_prompt_with_task(task:task_definition,
   recurrence_type = task.recurrence_type
   to_do_list = task.to_do_list
   additional_note = task.additional_note
+  
   messages = [
       {
           "role": "user",
           "content": [
               {"type": "image"},
               {"type": "text", "text": f"""Describe the {type_of_calendar_event} in the image. 
-
+                                        
+                                      
+                                      Use date information in the image. i.e., especially where day, month and year are mentioned, ensure these are recorded and used to interpret the schedules/timetables in the image.
+                                      
                                       Write a table where each row is one event/period/routine/activity in the schedule/timetable :
                                       1. Column 1: Title of the event/period/routine/activity
                                       2. Column 2: Date and Time in DD-MMM-YYYY HH:MM format where HH is 24-hour format.
@@ -105,7 +109,6 @@ def def_prompt_with_task(task:task_definition,
                                       
                                       Use additional notes {additional_note} for interpreting the image.  
                                       
-                                      Ensure that the date information in the image is used to interpret the image.
 
                                       """}
           ]
