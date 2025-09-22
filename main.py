@@ -103,7 +103,9 @@ def def_prompt_with_task(task:task_definition,
                                       3. Column 3: Estimated location: Both place, and specific sub-location 
                                       4. Column 4: Any additional notes relevant to the person 
                                       
-                                      Use additional notes {additional_note} for interpreting the photo.  
+                                      Use additional notes {additional_note} for interpreting the image.  
+                                      
+                                      Ensure that the date information in the image is used to interpret the image.
 
                                       """}
           ]

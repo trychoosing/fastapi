@@ -1,4 +1,5 @@
-apt-get update
+git clone https://github.com/trychoosing/fastapi.git
+apt-get update -y
 apt-get install vim -y
 pip install -r requirements.txt
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload --timeout-keep-alive 600
