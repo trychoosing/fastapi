@@ -99,7 +99,10 @@ def def_prompt_with_task(task:task_definition,
               {"type": "text", "text": f"""Describe the {type_of_calendar_event} in the image. 
                                         
                                       
-                                      Use date information in the image. i.e., especially where day, month and year are mentioned, ensure these are recorded and used to interpret the schedules/timetables in the image. The majority of the dates in a timetable will be labelled by the title month. If the day to the top left of a timetable is between 26, and the title/description of the month is February, then the top left date refers to 26th January.
+                                      Use date information in the image. i.e., especially where day, month and year are mentioned, ensure these are recorded and used to interpret the schedules/timetables in the image. The majority of the days in a timetable will be labelled by the title/description's month. 
+                                      Example 1: If the day to the top left of a timetable is 26, and the title/description of the month the timetable refers to is February, then the top left day refers to the 26th day of January. 
+                                      Example 2: If the day to the top left of a timetable is 29, and the title/description of the month the timetable refers to is February, then the top left day refers to the 29th day of January. 
+                                      The rest of the timetable is usually read from left to right, then  top to bottom. As an example, if the first day on the top left is 29 January, the next 5 days are 30 January, 31 January, 1st February, 2nd February, and 3rd February. In this case, the title/description month is February because most of the days in the table will be in February, but the first few are likely in January and last few likely in March. 
                                       
                                       Write a table where each row is one event/period/routine/activity in the schedule/timetable :
                                       1. Column 1: Title of the event/period/routine/activity
@@ -107,8 +110,7 @@ def def_prompt_with_task(task:task_definition,
                                       3. Column 3: Estimated location: Both place, and specific sub-location 
                                       4. Column 4: Any additional notes relevant to the person 
                                       
-                                      Use additional notes {additional_note} for interpreting the image.  
-                                      
+                                      Use additional notes {additional_note} for interpreting the image.   
 
                                       """}
           ]
