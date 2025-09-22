@@ -97,11 +97,13 @@ def def_prompt_with_task(task:task_definition,
               {"type": "image"},
               {"type": "text", "text": f"""Describe the {type_of_calendar_event} in the image. 
 
-                                      Write down each event/period/routine/activity in the {type_of_calendar_event} with legend.
-
-                                      Describe the schedule of the event/period/routine/activity, its location, and any notes {additional_note} for that event/period/routine/activity.     
+                                      Write a table where each row is one event/period/routine/activity in the schedule/timetable :
+                                      1. Column 1: Title of the event/period/routine/activity
+                                      2. Column 2: Date and Time in DD-MMM-YYYY HH:MM format where HH is 24-hour format.
+                                      3. Column 3: Estimated location: Both place, and specific sub-location 
+                                      4. Column 4: Any additional notes relevant to the person 
                                       
-                                      In particular, the schedule should include dates in DD-MMM-YYYY HH:MM format where HH is 24-hour format.
+                                      Use additional notes {additional_note} for interpreting the photo.  
 
                                       """}
           ]
