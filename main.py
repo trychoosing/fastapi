@@ -99,7 +99,7 @@ def def_prompt_with_task(task:task_definition,
               {"type": "text", "text": f"""Describe the {type_of_calendar_event} in the image. 
                                         
                                       
-                                      Use date information in the image. i.e., especially where day, month and year are mentioned, ensure these are recorded and used to interpret the schedules/timetables in the image. The majority of the dates in a timetable will be labelled by the title month. If the day to the top left of a timetable is between 25-31, the starting date is the month before the title month.
+                                      Use date information in the image. i.e., especially where day, month and year are mentioned, ensure these are recorded and used to interpret the schedules/timetables in the image. The majority of the dates in a timetable will be labelled by the title month. If the day to the top left of a timetable is between 26, and the title/description of the month is February, then the top left date refers to 26th January.
                                       
                                       Write a table where each row is one event/period/routine/activity in the schedule/timetable :
                                       1. Column 1: Title of the event/period/routine/activity
