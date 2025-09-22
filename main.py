@@ -99,7 +99,7 @@ def def_prompt_with_task(task:task_definition,
               {"type": "text", "text": f"""Describe the {type_of_calendar_event} in the image. 
                                         
                                       
-                                      Use date information in the image. i.e., especially where day, month and year are mentioned, ensure these are recorded and used to interpret the schedules/timetables in the image.
+                                      Use date information in the image. i.e., especially where day, month and year are mentioned, ensure these are recorded and used to interpret the schedules/timetables in the image. The majority of the dates in a timetable will be labelled by the title month. 
                                       
                                       Write a table where each row is one event/period/routine/activity in the schedule/timetable :
                                       1. Column 1: Title of the event/period/routine/activity
