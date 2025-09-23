@@ -128,12 +128,12 @@ async def liveness(prompt_1:  str= Body(...) ):
         A simple string message indicating the API is working.
     """
     import os
-    prompt_11= [item.strip() for item in prompt_1[0].split(',')] 
+    prompt_11=  prompt_1
   
-    if os.path.exists('/fastapi/uf/text_gen'+str(prompt_11[0])+'.txt')==True:
-        with open('/fastapi/uf/text_gen'+str(prompt_11[1])+'.txt','r') as f:
+    if os.path.exists('/fastapi/uf/text_gen'+str(prompt_11)+'.txt')==True:
+        with open('/fastapi/uf/text_gen'+str(prompt_11)+'.txt','r') as f:
           text_gen1 = f.read()
-        os.system("rm /fastapi/uf/text_gen"+str(prompt_11[1])+".txt")
+        os.system("rm /fastapi/uf/text_gen"+str(prompt_11)+".txt")
         return  {'text_gen1':text_gen1}
     else:
         return {'liveness':'liveness'}
