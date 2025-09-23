@@ -67,52 +67,17 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-model1, processor1, DEVICE1 = load_qwen_VLM_model()
-
-
-class task_definition():
-      def __init__(self,
-                   type_of_calendar_event,
-                   do_or_note,
-                   recurrence_type,
-                   to_do_list,
-                   additional_note):
-        self.type_of_calendar_event = type_of_calendar_event
-        self.do_or_note = do_or_note
-        self.recurrence_type = recurrence_type
-        self.to_do_list = to_do_list
-        self.additional_note = additional_note
+model1, processor1, DEVICE1 = load_qwen_VLM_model() 
         
-def def_prompt_with_task(task:task_definition,
+def def_prompt_with_task(promptit_for_run:str,
                      processor:AutoProcessor):
-  type_of_calendar_event = task.type_of_calendar_event
-  do_or_note = task.do_or_note
-  recurrence_type = task.recurrence_type
-  to_do_list = task.to_do_list
-  additional_note = task.additional_note
   
   messages = [
       {
           "role": "user",
           "content": [
               {"type": "image"},
-              {"type": "text", "text": f"""Describe the {type_of_calendar_event} in the image. 
-                                        
-                                      
-                                      Use date information in the image. i.e., especially where day, month and year are mentioned, ensure these are recorded and used to interpret the schedules/timetables in the image. The majority of the days in a timetable will be labelled by the title/description's month. 
-                                      Example 1: If the day to the top left of a timetable is 26, and the title/description of the month the timetable refers to is February, then the top left day refers to the 26th day of January. 
-                                      Example 2: If the day to the top left of a timetable is 29, and the title/description of the month the timetable refers to is February, then the top left day refers to the 29th day of January. 
-                                      The rest of the timetable is usually read from left to right, then  top to bottom. As an example, if the first day on the top left is 29 January, the next 5 days are 30 January, 31 January, 1st February, 2nd February, and 3rd February. In this case, the title/description month is February because most of the days in the table will be in February, but the first few are likely in January and last few likely in March. 
-                                      
-                                      Write a table where each row is one event/period/routine/activity in the schedule/timetable :
-                                      1. Column 1: Title of the event/period/routine/activity
-                                      2. Column 2: Date and Time in DD-MMM-YYYY HH:MM format where HH is 24-hour format.
-                                      3. Column 3: Estimated location: Both place, and specific sub-location 
-                                      4. Column 4: Any additional notes relevant to the person 
-                                      
-                                      Use additional notes {additional_note} for interpreting the image.   
-
-                                      """}
+              {"type": "text", "text": promptit_for_run }
           ]
       },
   ]
@@ -139,22 +104,30 @@ async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
     print('copy and close')
     image.file.close()
   image1 = load_image_for_qwen(f"/fastapi/uf/{image.filename}")
-  prompt_11= [item.strip() for item in prompt_1[0].split(',')]
-  task_1 = task_definition(prompt_11[0],prompt_11[1],prompt_11[2],prompt_11[3],prompt_11[4] )
-  prompt_2 = def_prompt_with_task(task_1,processor1)
+  prompt_11= [item.strip() for item in prompt_1[0].split('__**__')] 
+  
+  
+  prompt_2 = def_prompt_with_task(f"""Classify the image. If it is not a schedule, has no date or time information, return 'EXIT'. If not, return 'PASS' """,processor1)
   text_gen1 = generate_text_from_image_VLM(model1,
                                            processor1,
                                           prompt_2,
                                           image1,
                                           DEVICE1,)
-  if os.path.exists( '/fastapi/uf/text_gen.txt')==True :
-      return 'Wait'
-  with open('/fastapi/uf/text_gen.txt','w') as f:
-      f.write(text_gen1)
-  return {'text_gen1':text_gen1}
+  if 'EXIT' in text_gen1:
+      return 'bad image'
+  elif 'PASS' in text_gen1:
+      prompt_2 = def_prompt_with_task(prompt_11[0],processor1)
+      text_gen1 = generate_text_from_image_VLM(model1,
+                                               processor1,
+                                              prompt_2,
+                                              image1,
+                                              DEVICE1,) 
+      with open('/fastapi/uf/text_gen'+str(prompt_11[1])+'.txt','w') as f:
+          f.write(text_gen1)
+  return 'done'
   
 @app.get("/liveness")
-async def liveness():
+async def liveness(prompt_1:  List[str]  ):
     """
     Define a liveness check endpoint.
 
@@ -164,10 +137,12 @@ async def liveness():
         A simple string message indicating the API is working.
     """
     import os
-    if os.path.exists('/fastapi/uf/text_gen.txt')==True:
-        with open('/fastapi/uf/text_gen.txt','r') as f:
+    prompt_11= [item.strip() for item in prompt_1[0].split(',')] 
+  
+    if os.path.exists('/fastapi/uf/text_gen'+str(prompt_11[0])+'.txt')==True:
+        with open('/fastapi/uf/text_gen'+str(prompt_11[1])+'.txt','r') as f:
           text_gen1 = f.read()
-        os.system("rm /fastapi/uf/*")
+        os.system("rm /fastapi/uf/text_gen"+str(prompt_11[1])+".txt")
         return  {'text_gen1':text_gen1}
     else:
         return 'liveness'
