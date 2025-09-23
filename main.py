@@ -126,7 +126,7 @@ async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
           f.write(text_gen1)
   return 'done'
   
-@app.get("/liveness")
+@app.post("/liveness")
 async def liveness(prompt_1:  List[str]  ):
     """
     Define a liveness check endpoint.
@@ -145,7 +145,7 @@ async def liveness(prompt_1:  List[str]  ):
         os.system("rm /fastapi/uf/text_gen"+str(prompt_11[1])+".txt")
         return  {'text_gen1':text_gen1}
     else:
-        return 'liveness'
+        return {'liveness':'liveness'}
         
  
 @app.get("/")
