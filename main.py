@@ -113,12 +113,12 @@ async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
                                           prompt_2,
                                           image1,
                                           DEVICE1,) 
-  with open('/fastapi/uf/text_gen'+str(prompt_11[1])+'.txt','w') as f:
+  with open('/fastapi/uf/text_gen.txt','w') as f:
       f.write(text_gen1)
-  return 'done'
+  return   {'text_gen1':text_gen1}
   
-@app.post("/liveness")
-async def liveness(prompt_1:  str= Body(...) ):
+@app.get("/liveness")
+async def liveness( ):
     """data: str = Body(...)
     Define a liveness check endpoint.
 
@@ -127,13 +127,12 @@ async def liveness(prompt_1:  str= Body(...) ):
     Returns:
         A simple string message indicating the API is working.
     """
-    import os
-    prompt_11=  prompt_1
+    import os 
   
-    if os.path.exists('/fastapi/uf/text_gen'+str(prompt_11)+'.txt')==True:
-        with open('/fastapi/uf/text_gen'+str(prompt_11)+'.txt','r') as f:
+    if os.path.exists('/fastapi/uf/text_gen.txt')==True:
+        with open('/fastapi/uf/text_gen.txt','r') as f:
           text_gen1 = f.read()
-        os.system("rm /fastapi/uf/text_gen"+str(prompt_11)+".txt")
+        os.system("rm /fastapi/uf/text_gen.txt")
         return  {'text_gen1':text_gen1}
     else:
         return {'liveness':'liveness'}
