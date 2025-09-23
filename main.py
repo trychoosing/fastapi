@@ -105,30 +105,21 @@ async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
     image.file.close()
   image1 = load_image_for_qwen(f"/fastapi/uf/{image.filename}")
   prompt_11= [item.strip() for item in prompt_1[0].split('__**__')] 
-  
-  
-  prompt_2 = def_prompt_with_task(f"""Classify the image. If it is not a schedule, has no date or time information, return 'EXIT'. If not, return 'PASS' """,processor1)
+  print(prompt_11)
+   
+  prompt_2 = def_prompt_with_task(prompt_11[0],processor1)
   text_gen1 = generate_text_from_image_VLM(model1,
                                            processor1,
                                           prompt_2,
                                           image1,
-                                          DEVICE1,)
-  if 'EXIT' in text_gen1:
-      return 'bad image'
-  elif 'PASS' in text_gen1:
-      prompt_2 = def_prompt_with_task(prompt_11[0],processor1)
-      text_gen1 = generate_text_from_image_VLM(model1,
-                                               processor1,
-                                              prompt_2,
-                                              image1,
-                                              DEVICE1,) 
-      with open('/fastapi/uf/text_gen'+str(prompt_11[1])+'.txt','w') as f:
-          f.write(text_gen1)
+                                          DEVICE1,) 
+  with open('/fastapi/uf/text_gen'+str(prompt_11[1])+'.txt','w') as f:
+      f.write(text_gen1)
   return 'done'
   
 @app.post("/liveness")
-async def liveness(prompt_1:  List[str]  ):
-    """
+async def liveness(prompt_1:  str= Body(...) ):
+    """data: str = Body(...)
     Define a liveness check endpoint.
 
     This route is used to verify that the API is operational and responding to requests.
