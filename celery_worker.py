@@ -1,5 +1,6 @@
 import time
 from config import celery_app
+import os
 def load_qwen_VLM_model():
 
   import torch

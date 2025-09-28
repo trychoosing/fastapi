@@ -53,6 +53,11 @@ def def_prompt_with_task(promptit_for_run:str,
   return prompt
  
 
+def load_image_for_qwen(nowfile:os.PathLike):
+
+  from transformers.image_utils import load_image
+  image1 = load_image(nowfile )
+  return image1
  
 
 @app.get("/task-status/{task_id}")
@@ -76,8 +81,7 @@ async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
   image1 = load_image_for_qwen(f"/fastapi/uf/{image.filename}")
   prompt_11= [item.strip() for item in prompt_1[0].split('__**__')] 
   #print(prompt_11) 
-  prompt_2 = def_prompt_with_task(prompt_11[0],processor1)
-  text_gen1 = long_running_task(prompt_2,image1)
+  prompt_2 = def_prompt_with_task(prompt_11[0],processor1) 
   task = long_running_task.delay(prompt_2,image1)  # Enqueue the task
   return {"message": "Task enqueued", "task_id": task.id}
   

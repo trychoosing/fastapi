@@ -5,3 +5,4 @@ torch
 Pillow
 python-multipart
 celery
+redis
