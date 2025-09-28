@@ -12,45 +12,11 @@ from typing import List
 # Define API endpoints
 import shutil
 import json
+from celery.result import AsyncResult
+from config import celery_app
+from celery_worker import long_running_task
  
 
-def load_qwen_VLM_model():
-
-  import torch
-  from PIL import Image
-  from transformers import AutoProcessor, AutoModelForImageTextToText
-
-  DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-  # Initialize processor and model
-  processor = AutoProcessor.from_pretrained("Qwen/Qwen2.5-VL-7B-Instruct")
-  model = AutoModelForImageTextToText.from_pretrained(
-      "Qwen/Qwen2.5-VL-7B-Instruct",
-      dtype=torch.bfloat16,
-  ).to(DEVICE)
-  return model,processor,DEVICE
-def load_image_for_qwen(nowfile:os.PathLike):
-
-  from transformers.image_utils import load_image
-  image1 = load_image(nowfile )
-  return image1
-#define tasks
-
-def generate_text_from_image_VLM(model,
-                                 processor,
-                                 prompt,
-                             image1,
-                             DEVICE,):
-  inputs = processor(text=prompt, images=[image1 ], return_tensors="pt")
-  inputs = inputs.to(DEVICE)
-
-  # Generate outputs
-  generated_ids = model.generate(**inputs, max_new_tokens=5000)
-  generated_texts = processor.batch_decode(
-      generated_ids,
-      skip_special_tokens=True,
-  )
-  text_gen =  generated_texts[0]
-  return text_gen
 
 # Register routes using LangChain's utility function which integrates the chat model into the API.
 
@@ -67,7 +33,6 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-model1, processor1, DEVICE1 = load_qwen_VLM_model() 
         
 def def_prompt_with_task(promptit_for_run:str,
                      processor:AutoProcessor):
@@ -88,8 +53,14 @@ def def_prompt_with_task(promptit_for_run:str,
   return prompt
  
 
+ 
 
-
+@app.get("/task-status/{task_id}")
+async def get_task_status(task_id: str):
+    task = process_data.AsyncResult(task_id)
+    if task.ready():
+        return {"status": "completed", "result": task.result}
+    return {"status": "pending", "state": task.state}
 
 
 @app.post("/submit")
@@ -99,24 +70,18 @@ async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
     print('trying')
     with open(f"/fastapi/uf/{image.filename}", "wb") as buffer:
       shutil.copyfileobj(image.file, buffer)
-  finally:
-      
+  finally: 
     print('copy and close')
     image.file.close()
   image1 = load_image_for_qwen(f"/fastapi/uf/{image.filename}")
   prompt_11= [item.strip() for item in prompt_1[0].split('__**__')] 
-  print(prompt_11)
-   
+  #print(prompt_11) 
   prompt_2 = def_prompt_with_task(prompt_11[0],processor1)
-  text_gen1 = generate_text_from_image_VLM(model1,
-                                           processor1,
-                                          prompt_2,
-                                          image1,
-                                          DEVICE1,) 
-  with open('/fastapi/uf/text_gen.txt','w') as f:
-      f.write(text_gen1)
-  return   {'text_gen1':text_gen1}
+  text_gen1 = long_running_task(prompt_2,image1)
+  task = long_running_task.delay(prompt_2,image1)  # Enqueue the task
+  return {"message": "Task enqueued", "task_id": task.id}
   
+   
 @app.get("/liveness")
 async def liveness( ):
     """data: str = Body(...)
