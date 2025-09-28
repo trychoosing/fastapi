@@ -70,19 +70,8 @@ async def get_task_status(task_id: str):
 
 @app.post("/submit")
 async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
-  print('received')
-  try:
-    print('trying')
-    with open(f"/fastapi/uf/{image.filename}", "wb") as buffer:
-      shutil.copyfileobj(image.file, buffer)
-  finally: 
-    print('copy and close')
-    image.file.close()
-  image1 = load_image_for_qwen(f"/fastapi/uf/{image.filename}")
-  prompt_11= [item.strip() for item in prompt_1[0].split('__**__')] 
-  #print(prompt_11) 
-  prompt_2 = def_prompt_with_task(prompt_11[0],processor1) 
-  task = long_running_task.delay(prompt_2,image1)  # Enqueue the task
+  
+  task = long_running_task.delay(prompt_1,image)  # Enqueue the task
   return {"message": "Task enqueued", "task_id": task.id}
   
    

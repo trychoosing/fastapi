@@ -44,14 +44,25 @@ def generate_text_from_image_VLM(model,
   
   
 @celery_app.task
-def long_running_task(prompt_2,
-                      image1  ):
+def long_running_task(prompt_1,
+                      image  ):
     """Simulates a long-running task."""
      
-    
-    text_gen1 = generate_text_from_image_VLM(model1,
+  print('received')
+  try:
+    print('trying')
+    with open(f"/fastapi/uf/{image.filename}", "wb") as buffer:
+      shutil.copyfileobj(image.file, buffer)
+  finally: 
+    print('copy and close')
+    image.file.close()
+  image1 = load_image_for_qwen(f"/fastapi/uf/{image.filename}")
+  prompt_11= [item.strip() for item in prompt_1[0].split('__**__')] 
+  #print(prompt_11) 
+  prompt_2 = def_prompt_with_task(prompt_11[0],processor1) 
+  text_gen1 = generate_text_from_image_VLM(model1,
                                            processor1,
                                           prompt_2,
                                           image1,
                                           DEVICE1,)    
-    return text_gen1
+  return text_gen1
