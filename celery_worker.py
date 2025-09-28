@@ -1,5 +1,5 @@
-import time
-from config import celery_app
+import time 
+
 import os
 def load_qwen_VLM_model():
 
@@ -24,7 +24,6 @@ def load_image_for_qwen(nowfile:os.PathLike):
   return image1
 #define tasks
 
-model1, processor1, DEVICE1 = load_qwen_VLM_model() 
 def generate_text_from_image_VLM(model,
                                  processor,
                                  prompt,
@@ -42,27 +41,44 @@ def generate_text_from_image_VLM(model,
   text_gen =  generated_texts[0]
   return text_gen  
   
-  
-@celery_app.task
+   
 def long_running_task(prompt_1,
-                      image  ):
-    """Simulates a long-running task."""
-     
-  print('received')
-  try:
-    print('trying')
-    with open(f"/fastapi/uf/{image.filename}", "wb") as buffer:
-      shutil.copyfileobj(image.file, buffer)
-  finally: 
-    print('copy and close')
-    image.file.close()
-  image1 = load_image_for_qwen(f"/fastapi/uf/{image.filename}")
-  prompt_11= [item.strip() for item in prompt_1[0].split('__**__')] 
-  #print(prompt_11) 
-  prompt_2 = def_prompt_with_task(prompt_11[0],processor1) 
-  text_gen1 = generate_text_from_image_VLM(model1,
+                      image_p  ):
+    """Simulates a long-running task.""" 
+    image1 = load_image_for_qwen(image_p)  
+    prompt_2 = def_prompt_with_task(prompt_1 ,processor1) 
+    text_gen1 = generate_text_from_image_VLM(model1,
                                            processor1,
                                           prompt_2,
                                           image1,
                                           DEVICE1,)    
-  return text_gen1
+    return text_gen1
+if __name__=="__main__":
+    import os
+    import time 
+    mainfilepath = "/fastapi/uf/"
+    model1, processor1, DEVICE1 = load_qwen_VLM_model() 
+    while 1:
+        nowfilepaths =  os.path.listdir(mainfilepath )
+        full_paths = []
+        nowfilepaths1 = [x for x in nowfilepaths if '.txt' not in x]
+        try:
+            item = nowfilepaths1[0] 
+            
+            with open(  item+'.txt' ,'r') as ff:
+                prompt1 = ff.read()
+            image_path =  item  
+            text_gen1 = long_running_task(prompt_1,  image_path  )
+            with open( item+'text_gen.txt','w') as ff:
+                ff.write(text_gen1)
+            os.system('rm '+item+'.txt')
+            os.system('rm '+item )
+            
+            time.sleep(0.1)
+         
+        except Exception :
+            
+            time.sleep(1)
+         
+        
+        

@@ -62,17 +62,38 @@ def load_image_for_qwen(nowfile:os.PathLike):
 
 @app.get("/task-status/{task_id}")
 async def get_task_status(task_id: str):
-    task = process_data.AsyncResult(task_id)
-    if task.ready():
-        return {"status": "completed", "result": task.result}
-    return {"status": "pending", "state": task.state}
+    mainfilepath = "/fastapi/uf/"
+    if os.path.exists(mainfilepath+task_id+"text_gen.txt") ==True:
+        with open(mainfilepath+task_id+"text_gen.txt",'r') as ff:
+            result = ff.read()
+             
+        os.system("rm "+mainfilepath+task_id+"text_gen.txt")
+        return {"status": "completed", "result":  result}
+    else:
+        return {"status": "pending" }
 
+import uuid
+import datetime
 
 @app.post("/submit")
 async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
-  
-  task = long_running_task.delay(prompt_1,image)  # Enqueue the task
-  return {"message": "Task enqueued", "task_id": task.id}
+  print('received')
+   
+  prompt_11= [item.strip() for item in prompt_1[0].split('__**__')] 
+  uuig = prompt_11[1]
+  try:
+    print('trying')
+    with open(f"/fastapi/uf/{uuig}", "wb") as buffer:
+      shutil.copyfileobj(image.file, buffer)
+  finally: 
+    print('copy and close')
+    image.file.close()
+  uuig1=uuig+'.txt'
+  with open(f"/fastapi/uf/{uuig1}" ,'w' ) as ff:
+    ff.write(prompt_11[0])
+   
+  taskid =  prompt_11[1]
+  return   {"message": "Task enqueued", "task_id": taskid} 
   
    
 @app.get("/liveness")

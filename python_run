@@ -12,8 +12,7 @@ pip install -r requirements.txt
 mkdir uf
 uvicorn main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 600
 
-celery -A celery_worker worker --loglevel=debug
- 
+python celery_worker.py 
  
 apt-get update -y
 apt-get install vim -y
