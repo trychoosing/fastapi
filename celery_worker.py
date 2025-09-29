@@ -1,5 +1,6 @@
 import time 
 
+from transformers import AutoProcessor
 import os
 def load_qwen_VLM_model():
 
@@ -24,6 +25,24 @@ def load_image_for_qwen(nowfile:os.PathLike):
   return image1
 #define tasks
 
+        
+def def_prompt_with_task(promptit_for_run:str,
+                     processor:AutoProcessor):
+  
+  messages = [
+      {
+          "role": "user",
+          "content": [
+              {"type": "image"},
+              {"type": "text", "text": promptit_for_run }
+          ]
+      },
+  ]
+
+  # Prepare inputs
+  prompt = processor.apply_chat_template(messages, add_generation_prompt=True)
+
+  return prompt
 def generate_text_from_image_VLM(model,
                                  processor,
                                  prompt,
@@ -59,20 +78,20 @@ if __name__=="__main__":
     mainfilepath = "/fastapi/uf/"
     model1, processor1, DEVICE1 = load_qwen_VLM_model() 
     while 1:
-        nowfilepaths =  os.path.listdir(mainfilepath )
+        nowfilepaths =  os.listdir(mainfilepath )
         full_paths = []
         nowfilepaths1 = [x for x in nowfilepaths if '.txt' not in x]
         try:
             item = nowfilepaths1[0] 
             
-            with open(  item+'.txt' ,'r') as ff:
+            with open(  os.path.join(mainfilepath,item+'.txt') ,'r') as ff:
                 prompt1 = ff.read()
-            image_path =  item  
-            text_gen1 = long_running_task(prompt_1,  image_path  )
-            with open( item+'text_gen.txt','w') as ff:
+            image_path =   os.path.join(mainfilepath,item  )
+            text_gen1 = long_running_task(prompt1,  image_path  )
+            with open(  os.path.join(mainfilepath,item+'text_gen.txt'),'w') as ff:
                 ff.write(text_gen1)
-            os.system('rm '+item+'.txt')
-            os.system('rm '+item )
+            os.system('rm '+mainfilepath+item+'.txt')
+            os.system('rm '+mainfilepath+item )
             
             time.sleep(0.1)
          

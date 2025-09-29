@@ -11,11 +11,11 @@ from typing import Annotated
 from typing import List
 # Define API endpoints
 import shutil
-import json
-from celery.result import AsyncResult
-from config import celery_app
-from celery_worker import long_running_task
- 
+import json 
+from celery_worker import long_running_task 
+
+import uuid
+import datetime
 
 
 # Register routes using LangChain's utility function which integrates the chat model into the API.
@@ -72,9 +72,6 @@ async def get_task_status(task_id: str):
     else:
         return {"status": "pending" }
 
-import uuid
-import datetime
-
 @app.post("/submit")
 async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
   print('received')
@@ -94,28 +91,7 @@ async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
    
   taskid =  prompt_11[1]
   return   {"message": "Task enqueued", "task_id": taskid} 
-  
    
-@app.get("/liveness")
-async def liveness( ):
-    """data: str = Body(...)
-    Define a liveness check endpoint.
-
-    This route is used to verify that the API is operational and responding to requests.
-
-    Returns:
-        A simple string message indicating the API is working.
-    """
-    import os 
-  
-    if os.path.exists('/fastapi/uf/text_gen.txt')==True:
-        with open('/fastapi/uf/text_gen.txt','r') as f:
-          text_gen1 = f.read()
-        os.system("rm /fastapi/uf/text_gen.txt")
-        return  {'text_gen1':text_gen1}
-    else:
-        return {'liveness':'liveness'}
-        
  
 @app.get("/")
 async def root():
