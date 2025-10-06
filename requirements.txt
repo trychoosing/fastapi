@@ -6,3 +6,4 @@ Pillow
 python-multipart
 celery
 redis
+hf_transfer

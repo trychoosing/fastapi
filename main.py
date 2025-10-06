@@ -78,6 +78,7 @@ async def submit(prompt_1:  List[str]   , image: UploadFile = File(...)):
    
   prompt_11= [item.strip() for item in prompt_1[0].split('__**__')] 
   uuig = prompt_11[1]
+  
   try:
     print('trying')
     with open(f"/fastapi/uf/{uuig}", "wb") as buffer:
@@ -99,6 +100,4 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"message": "ok"}
-#if __name__ == "__main__":
-#    uvicorn.run(app, host="127.0.0.1", port=8000)
+    return {"message": "ok"} 
